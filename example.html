@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>TEST</title>
+      <style>
+         div {
+            position: absolute;
+            width: 60px; height: 60px;
+            background: #ddd; color: #e44;
+            border-radius: 30px; border: 2px solid #777;
+            font-family: Verdana; font-size: 25px; font-weight: bold;
+            text-align: center; text-shadow: 0 -6px #e44;
+         }
+      </style>
+   </head>
+   <body>
+      <div>|</div>
+      <input type="range" value=20 min=5 max=150>
+   <script src="Velocity.js"></script>
+   <script>
+   var iTk=document.querySelector("input");
+      var d=document.querySelector("div");
+
+      //psuedo y-pos solid collision
+      vel= new Velocity();
+      vel.x=document.body.clientWidth/2-30;vel.y=256;
+      var jumping=false, jumpHeight=130;
+      var jump=false,left=false,right=false,fall=false;
+
+      var tickRate=20;
+      function tick(){
+        if (jump&&!vel.yRun&&vel.y==256){
+          vel.setVelY(-jumpHeight,25,1);
+          jumping= true;
+        }
+        if (fall && jumping){
+          jumping=false;
+          vel.setVelY(256-vel.y,10,0);
+        }
+        if (jumping){
+          if (vel.y!=256 && !vel.yRun)vel.setVelY(jumpHeight,20,2);
+          else if (vel.y==256 && !vel.yRun)jumping=false;
+        }
+        if (left+right==1){
+          if (vel.xRun)vel.xRun=false;
+          vel.x+=left? -3.5: 3.5;
+        }
+        vel.tick();
+        d.style.left=vel.x+"px";
+        d.style.top=vel.y+"px";
+        d.style.transform= "rotateZ("+(vel.x*3)%360+"deg)";
+
+        setTimeout(tick,tickRate);
+      }
+      tick();
+      document.onkeydown=function(e){
+        var k=e.keyCode;
+        if (k==32){
+          jump=true;
+        } else if (k==65){//A
+          left=true;
+        } else if (k==68){//D
+          right=true;
+        } else if (k==83){//S
+          fall=true;
+        }
+      };
+      document.onkeyup=function(e){
+        var k=e.keyCode;
+        if (k==32){
+          jump=false;
+        } else if (k==65){
+          left= false;
+          if (!right&&!vel.xRun) vel.setVelX(-70,45,1);
+        } else if (k==68){
+          right= false;
+          if (!left&&!vel.xRun) vel.setVelX(70,45,1);
+        } else if (k==83){
+          fall=false;
+        }
+      }
+
+      // up 50 in 20ticks/1sec
+      //
+      iTk.onchange=function(){
+         tickRate= iTk.value;
+      };
+   </script>
+   </body>
+</html>
